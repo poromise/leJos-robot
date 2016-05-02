@@ -61,13 +61,16 @@ public class RobotController {
 	public void runProgram() {
 		LCD.clear();
 		LCD.drawString("S.P.H.I.N.C.T.E.R.", 1, 1);
-		LCD.drawString("Copyright Merimakkara 2016", 1, 2);
+		LCD.drawString("Copyright", 1, 2);
+		LCD.drawString("Merimakkara", 1, 3);
+		LCD.drawString("2016", 1, 4);
 		Delay.msDelay(3000);
 		
 		while(!Button.ESCAPE.isDown()) {
+			Delay.msDelay(300);
 			LCD.clear();
-			LCD.drawString("Press LEFT to drive", 1, 1);
-			LCD.drawString("Press RIGHT to schedule a program", 1, 2);
+			LCD.drawString("LEFT to drive", 1, 1);
+			LCD.drawString("RIGHT to schedule", 1, 2);
 			// Wait for any key press
 			int pressedButton = Button.waitForAnyPress();
 			if (pressedButton == Button.ID_LEFT) {
@@ -82,17 +85,21 @@ public class RobotController {
 					int waitTime = scheduledProgramWaitTime();
 					if (waitTime != 0) {
 						executable.waitForExecute(waitTime);
-						executeProgram(executable);
-						LCD.clear();
-						LCD.drawString("Program " + executable.programName + " executed.", 1, 1);
-						Delay.msDelay(3000);
-						
+						if (!executable.abort) {
+							executeProgram(executable);
+							LCD.clear();
+							LCD.drawString(executable.programName + " executed.", 1, 1);
+							Delay.msDelay(3000);
+						} else if (executable.abort) {
+							executable.abort = false;
+						}
 					}
 				}
 			}
 		}
 		lMotor.close();
 		rMotor.close();
+		irc.interrupt();
 		irc.terminateSensor();
 	}
 	
@@ -107,7 +114,7 @@ public class RobotController {
 	private void listenToInput() {
 		LCD.clear();
 		LCD.drawString("DRIVE MODE", 1, 1);
-		LCD.drawString("Press UP for menu", 1, 2);
+		LCD.drawString("UP for menu", 1, 3);
 		while (!Button.UP.isDown()) {
 			if (irc.getTouchState()) {
 				obstacleHit();
@@ -119,32 +126,32 @@ public class RobotController {
 			}
 		}
 	}
-	/**
-	 * Contains the menu in which the schedulable program and the time waited
-	 * before execution are determined and executed.
-	 */
+/**
+ * Contains the menu in which the schedulable program is determined.
+ * Returns a ScheduleProgram instance (or null if the user exits).
+ * @return ScheduleProgram An instance of ScheduleProgram that is the selected program.
+ */
 	private ScheduleProgram scheduledProgram() {
 		int pressedButton; // Numeric ID of the button last pressed
 		int currentListPosition = 0; // Integer to act as index of currently selected program
 		ScheduleProgram selectedProgram = progList.get(currentListPosition);
 		int lastProgramPosition = progList.size() - 1; // Index number of last program on list
 		
-		// Draw instructions and name of 1st program on screen
+		// Draw instructions on screen
 		LCD.clear();
 		LCD.drawString("SCHEDULING", 1, 1);
-		LCD.drawString("Select action to schedule.", 1, 2);
-		LCD.drawString("Scroll with LEFT and RIGHT", 1, 3);
-		LCD.drawString("Select with ENTER.", 1, 4);
+		LCD.drawString("Select program", 1, 2);
+		LCD.drawString("Scroll w/ L & R", 1, 3);
+		LCD.drawString("Select - ENTER", 1, 4);
 		// Loops until enter or escape is pressed.
-		System.out.println("ennen while-looppia");
-		Delay.msDelay(2000);
 		while ( true ) {
 			// for explanation see comment on similar while loop in scheduledProgramWaitTime()
 			pressedButton = Button.ID_DOWN;
+			Delay.msDelay(300);
+			// Clear row 5 and draw the current program's name
 			LCD.clear(5);
-			LCD.drawString("<- Program: " + selectedProgram.programName + " ->", 1, 5);
+			LCD.drawString("<- " + selectedProgram.programName + " ->", 1, 5);
 			pressedButton = Button.waitForAnyPress();
-			System.out.println("while-loopissa");
 			if (pressedButton == Button.ID_ESCAPE) {
 				// Escape stops execution of rest of the method, returns null
 				return null;
@@ -166,8 +173,10 @@ public class RobotController {
 					currentListPosition++;
 				}
 			}
+			// Updates the selected program at the end of the while loop
+			selectedProgram = progList.get(currentListPosition);
 		}
-		selectedProgram = progList.get(currentListPosition);
+		// Returns said program
 		return selectedProgram;
 	}
 	
@@ -178,33 +187,35 @@ public class RobotController {
 	 * @return int The selected waiting time as an integer
 	 */
 	private int scheduledProgramWaitTime() {
-		int pressedButton;
-		int currentListPosition = 0;
-		int selectedWaitTime;
-		int lastItemInList = waitTimeList.size() - 1;
+		int pressedButton; // Holds the ID of the last button pressed
+		int currentListPosition = 0; // Specifies the selected position on the list
+		int selectedWaitTime; // The currently selected item on the list
+		int lastItemInList = waitTimeList.size() - 1;  // Index of the last item on the list
 		
 		// Draws instructions on the screen.
 		LCD.clear();
 		LCD.drawString("SCHEDULING", 1, 1);
-		LCD.drawString("Set time to execution.", 1, 2);
-		LCD.drawString("Scroll with LEFT and RIGHT", 1, 3);
-		LCD.drawString("Select with ENTER.", 1, 4);
+		LCD.drawString("Time to execution", 1, 2);
+		LCD.drawString("Scroll w/ L & R", 1, 3);
+		LCD.drawString("Select - ENTER", 1, 4);
 		while ( true ) {
-			Delay.msDelay(500);
-			// Changes the input to DOWN so as to not loop the same key press action over
-			// and over again. Could have been done more efficiently, but this was the first
-			// thing that popped to my mind.
+			/* Changes the input to DOWN so as to not loop the same key press action over
+			 * and over again. Could have been done more efficiently, but this was the first
+			 * thing that popped to my mind and it seems to work. Probably not the best
+			 * idea for futureproofing.
+			 */
+			// TODO: Fix pressedButton resetting if you have time
 			pressedButton = Button.ID_DOWN;
+			Delay.msDelay(300);
 			selectedWaitTime = waitTimeList.get(currentListPosition);
-			LCD.clear(5);
-			
+			LCD.clear(5);			
 			// Draws the currently selected time on the 5th row
 			if (selectedWaitTime < 60) {
 				LCD.drawString("<- " + selectedWaitTime + " sec ->", 1, 5);
 			} else {
 				int seconds = selectedWaitTime % 60;
 				int minutes = (selectedWaitTime - seconds) / 60;
-				LCD.drawString("<- " + minutes +" min" + seconds + " sec ->", 1, 5);
+				LCD.drawString("<- " + minutes +" min " + seconds + " sec ->", 1, 5);
 			}
 			
 			// Button shenanigans, pretty much the same as in scheduledProgram()
@@ -227,7 +238,7 @@ public class RobotController {
 				}
 			}
 		}
-		return selectedWaitTime;
+		return selectedWaitTime; // Returns the currently selected value as an integer
 	}
 	/**
 	 * Moves the tracks according to given parameters.
@@ -284,7 +295,7 @@ public class RobotController {
 	 * @param direction int Integer that defines the direction in which to move the fist.
 	 */
 	private void moveFist(int direction) {
-		
+		// TODO: Build the fucking thing. Attach to robot. Code something here.
 	}
 	/**
 	 * Stops the motors and reverses them half a turn before letting the user
@@ -306,8 +317,10 @@ public class RobotController {
 	 * @param program ScheduleProgram The program which is to be executed.
 	 */
 	private void executeProgram(ScheduleProgram program) {
-		LCD.drawString("Executing program:", 1, 1);
+		LCD.drawString("Executing:", 1, 1);
 		LCD.drawString(program.programName, 1, 2);
+		// Iterates over all the actions in the program's action list,
+		// executes them and waits a while in between
 		for (int i : program.actionList) {
 			programmedManeuver(i);
 			Delay.msDelay(300);
@@ -323,42 +336,43 @@ public class RobotController {
 	 * @param maneuver int The numeric case number for the next executable maneuver.
 	 */
 	private void programmedManeuver(int maneuver) {
+		int rotAmount = 720;
 		switch (maneuver) {
 		case 1:
 			// left motor fwd
-			lMotor.rotate(5 * -360);
+			lMotor.rotate(-rotAmount);
 			break;
 		case 2:
 			// left motor bwd
-			lMotor.rotate(5 * 360);
+			lMotor.rotate(rotAmount);
 			break;
 		case 3:
 			// right motor fwd
-			rMotor.rotate(5 * -360);
+			rMotor.rotate(-rotAmount);
 			break;
 		case 4:
 			// right motor bwd
-			rMotor.rotate(5 * 360);
+			rMotor.rotate(rotAmount);
 			break;
 		case 5:
 			// forward
-			rMotor.rotate(5 * -360, true);
-			lMotor.rotate(5 * -360);
+			rMotor.rotate(-rotAmount, true);
+			lMotor.rotate(-rotAmount);
 			break;
 		case 6:
 			// turn right
-			lMotor.rotate(5 * -360,true);
-			rMotor.rotate(5 * 360);
+			lMotor.rotate(-rotAmount,true);
+			rMotor.rotate(rotAmount);
 			break;
 		case 7:
 			// turn left
-			lMotor.rotate(5 * 360, true);
-			rMotor.rotate(5 * -360);
+			lMotor.rotate(rotAmount, true);
+			rMotor.rotate(-rotAmount);
 			break;
 		case 8:
 			// backward
-			lMotor.rotate(5 * 360, true);
-			rMotor.rotate(5 * 360);
+			lMotor.rotate(rotAmount, true);
+			rMotor.rotate(rotAmount);
 			break;
 		default:
 			break;
