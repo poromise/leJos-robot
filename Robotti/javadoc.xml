@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="javadoc">
+    <target name="javadoc">
+        <javadoc access="public" author="true" classpath="." destdir="doc" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" source="1.7" sourcefiles="src/robotcontrol/ScheduleProgram.java" sourcepath="src" splitindex="true" use="true" version="true">
+            <link href="http://www.lejos.org/ev3/docs/"/>
+        </javadoc>
+    </target>
+</project>
