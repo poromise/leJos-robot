@@ -17,6 +17,7 @@ import java.util.Arrays;
 import lejos.hardware.Button;
 import lejos.hardware.lcd.LCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.hardware.port.MotorPort;
 import lejos.hardware.port.SensorPort;
 import lejos.hardware.sensor.EV3IRSensor;
@@ -29,8 +30,11 @@ public class RobotController {
 	private IRChecker irc = new IRChecker(irSensor);
 	private RegulatedMotor lMotor = new EV3LargeRegulatedMotor(MotorPort.A);
 	private RegulatedMotor rMotor = new EV3LargeRegulatedMotor(MotorPort.B);
+	private RegulatedMotor fistMotor = new EV3MediumRegulatedMotor(MotorPort.D);
 	
 	private ArrayList<Integer> waitTimeList = new ArrayList<Integer>();
+	private ArrayList<Integer> actionAmountList = new ArrayList<Integer>();
+	private ArrayList<Integer> actionIDList = new ArrayList<Integer>();
 	private ArrayList<ScheduleProgram> progList = new ArrayList<ScheduleProgram>();
 	private ScheduleProgram program1 = new ScheduleProgram("Scout");
 	private ScheduleProgram program2 = new ScheduleProgram("WTF??");
@@ -47,6 +51,8 @@ public class RobotController {
 		program3.actionList.addAll(Arrays.asList(5, 5, 5, 5));
 		program4.actionList.addAll(Arrays.asList(8, 8, 8, 8));
 		waitTimeList.addAll(Arrays.asList(5, 10, 30, 45, 60, 120, 180, 300, 600, 1800, 3600));
+		actionAmountList.addAll(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12));
+		actionIDList.addAll(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 10, 11));
 		progList.add(program1);
 		progList.add(program2);
 		progList.add(program3);
@@ -71,6 +77,7 @@ public class RobotController {
 			LCD.clear();
 			LCD.drawString("LEFT to drive", 1, 1);
 			LCD.drawString("RIGHT to schedule", 1, 2);
+			LCD.drawString("DOWN to program", 1, 3);
 			// Wait for any key press
 			int pressedButton = Button.waitForAnyPress();
 			if (pressedButton == Button.ID_LEFT) {
@@ -95,6 +102,8 @@ public class RobotController {
 						}
 					}
 				}
+			} else if (pressedButton == Button.ID_DOWN) {
+				
 			}
 		}
 		lMotor.close();
@@ -120,8 +129,16 @@ public class RobotController {
 				obstacleHit();
 			} else {
 				int userInput = irc.getUserInput();
-				if (0 <= userInput && 9 > userInput) {
+				if (1 <= userInput && 9 > userInput) {
 					moveTracks(userInput);
+				} else if (userInput == 10) {
+					moveFist(0);
+				} else if (userInput == 11) {
+					moveFist(1);
+				} else if (userInput == 0) {
+					rMotor.stop(true);
+					lMotor.stop(true);
+					fistMotor.stop(true);
 				}
 			}
 		}
@@ -178,6 +195,108 @@ public class RobotController {
 		}
 		// Returns said program
 		return selectedProgram;
+	}
+	/**
+	 * Menu where programs can be created for scheduled execution.
+	 * 
+	 * @return ScheduleProgram Returns the user-written program.
+	 */
+	private ScheduleProgram writeProgram() {
+		int currentListPosition = 0;
+		int lastItemOnList = actionAmountList.size() - 1;
+		int selectedActionAmount;
+		LCD.clear();
+		LCD.drawString("PROGRAMMING", 1, 1);
+		LCD.drawString("Select number", 1, 2);
+		LCD.drawString("of actions:", 1, 3);
+		// Same kind of menu that scheduledProgram() and scheduledProgramWaitTime() use
+		while (true) {
+			selectedActionAmount = actionAmountList.get(currentListPosition);
+			LCD.drawString("<- " + actionAmountList.get(currentListPosition) + " ->", 1, 4);
+			Delay.msDelay(300);
+			int buttonPressed = Button.waitForAnyPress();
+			if (buttonPressed == Button.ID_LEFT) {
+				if (currentListPosition == 0) {
+					currentListPosition = lastItemOnList;
+				} else {
+					currentListPosition--;
+				}
+			} else if (buttonPressed == Button.ID_RIGHT) {
+				if (currentListPosition == lastItemOnList) {
+					currentListPosition = 0;
+				} else {
+					currentListPosition++;
+				}
+			} else if (buttonPressed == Button.ID_ENTER) {
+				
+				break;
+			} else if (buttonPressed == Button.ID_ESCAPE) {
+				Delay.msDelay(500);
+				return null;
+			}						
+		}
+		
+		int loopValue;
+		int currentActionListPosition = 0;
+		int lastItemOnActionList = actionIDList.size() - 1;
+		ArrayList<Integer> programmedActions = new ArrayList<Integer>();
+		LCD.clear();
+		LCD.drawString("PROGRAMMING", 1, 1);
+		// Prompts the user to enter the amount of actions previously set
+		for (loopValue = 0; loopValue < selectedActionAmount; loopValue++) {
+			LCD.drawString("Set action " + (loopValue+1) + ":", 1, 2);
+			while (true) {
+				Delay.msDelay(300);
+				LCD.drawString("<- " + getActionName(currentActionListPosition) + " ->", 1, 3);
+				int buttonPressed = Button.waitForAnyPress();
+				if (buttonPressed == Button.ID_LEFT) {
+					if (currentActionListPosition == 0) {
+						currentActionListPosition = lastItemOnActionList;
+					} else {
+						currentActionListPosition--;
+					}
+				} else if (buttonPressed == Button.ID_RIGHT) {
+					if (currentActionListPosition == lastItemOnActionList) {
+						currentActionListPosition = 0;
+					} else {
+						currentActionListPosition++;
+					}
+				} else if (buttonPressed == Button.ID_ENTER) {
+					break;
+				} else if (buttonPressed == Button.ID_ESCAPE) {
+					// TÄHÄN JOTAIN!
+				}
+			}
+			// TODO: Finish this piece of crap
+		}
+		 
+	}
+	
+	private String getActionName(int actionID) {
+		switch(actionID) {
+		case 1:
+			return "LEFT FWD";
+		case 2:
+			return "LEFT BWD";
+		case 3: 
+			return "RIGHT FWD";
+		case 4:
+			return "RIGHT BWD";
+		case 5:
+			return "FORWARD";
+		case 6:
+			return "TURN RIGHT";
+		case 7:
+			return "TURN LEFT";
+		case 8:
+			return "BACKWARD";
+		case 10:
+			return "FIST LEFT";
+		case 11:
+			return "FIST RIGHT";
+		default:
+			return "ERROR";
+		}
 	}
 	
 	/**
@@ -248,38 +367,38 @@ public class RobotController {
 	private void moveTracks(int direction) {
 		switch (direction) {
 		case 1:
-			// left motor bwd
+			// left motor fwd
 			lMotor.backward();
 			break;
 		case 2:
-			// left motor fwd
+			// left motor bwd
 			lMotor.forward();
 			break;
 		case 3:
-			// right motor bwd
+			// right motor fwd
 			rMotor.backward();
 			break;
 		case 4:
-			// right motor fwd
+			// right motor bwd
 			rMotor.forward();
 			break;
 		case 5:
-			// backward
+			// fwd
 			rMotor.backward();
 			lMotor.backward();
 			break;
 		case 6:
-			// turn left
+			// turn right
 			lMotor.backward();
 			rMotor.forward();
 			break;
 		case 7:
-			// turn right
+			// turn left
 			lMotor.forward();
 			rMotor.backward();
 			break;
 		case 8:
-			// forward
+			// backward
 			lMotor.forward();
 			rMotor.forward();
 			break;
@@ -295,7 +414,16 @@ public class RobotController {
 	 * @param direction int Integer that defines the direction in which to move the fist.
 	 */
 	private void moveFist(int direction) {
-		// TODO: Build the fucking thing. Attach to robot. Code something here.
+		switch(direction) {
+		case 0:
+			fistMotor.forward();
+			break;
+		case 1:
+			fistMotor.backward();
+			break;
+		default:
+			break;
+		}
 	}
 	/**
 	 * Stops the motors and reverses them half a turn before letting the user
