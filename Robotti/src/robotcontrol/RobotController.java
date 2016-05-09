@@ -3,7 +3,17 @@ package robotcontrol;
 /**
  * <h1>RobotController.java class</h1>
  * RobotController is the basic functional class of this program. All the controlling
- * is done from here, threaded tasks are delegated to other specialized thread classes.
+ * is done from here, threaded tasks are delegated to an instance of IRChecker.
+ * 
+ * <p>
+ * 
+ * Some of these methods could have been implemented elsewhere (in other classes),
+ * but this program is basically the Frankenstein's monster of EV3 programs.
+ * Not pleasant to look at. 
+ * 
+ * <p>
+ * 
+ * At least it's fairly well commented.
  * 
  * @author Simo Hyttinen
  * @version 0.2
@@ -57,8 +67,8 @@ public class RobotController {
 		progList.add(program2);
 		progList.add(program3);
 		progList.add(program4);
-		// Starts infra red sensor checker thread
-		irc.start();
+		fistMotor.setSpeed(700); // Sets fist motor speed at just about maximum
+		irc.start(); // Starts infra red sensor checker thread
 	}
 	/**
 	 * The basic functionality of the program: Asks if the user wants to drive
@@ -72,7 +82,7 @@ public class RobotController {
 		LCD.drawString("2016", 1, 4);
 		Delay.msDelay(3000);
 		
-		while(!Button.ESCAPE.isDown()) {
+		while(true) {
 			Delay.msDelay(300);
 			LCD.clear();
 			LCD.drawString("LEFT to drive", 1, 1);
@@ -103,12 +113,28 @@ public class RobotController {
 					}
 				}
 			} else if (pressedButton == Button.ID_DOWN) {
-				
+				ScheduleProgram sP = writeProgram();
+				if (sP != null) {
+					progList.add(sP);
+					LCD.clear();
+					LCD.drawString("Program added:", 1, 1);
+					LCD.drawString(sP.programName, 1, 2);
+					Delay.msDelay(2000);
+					LCD.clear();
+				} else {
+					LCD.clear();
+					LCD.drawString("Aborted.", 1, 1);
+					Delay.msDelay(2000);
+					LCD.clear();
+				}
+			} else if (pressedButton == Button.ID_ESCAPE) {
+				break;
 			}
 		}
 		lMotor.close();
 		rMotor.close();
-		irc.interrupt();
+		irc.terminate = true;
+		Delay.msDelay(60);
 		irc.terminateSensor();
 	}
 	
@@ -116,7 +142,6 @@ public class RobotController {
 	 * Contains the while loop (terminatable by pressing ESCAPE on the EV3) 
 	 * that checks for user input from the IR sensor and delegates
 	 * the received input accordingly to the appropriate methods.
-	 * <p>
 	 * Also checks if touch sensor is activated. If it is, starts the obstacleHit()
 	 * method which stops the robot and reverses a bit.
 	 */
@@ -146,6 +171,7 @@ public class RobotController {
 /**
  * Contains the menu in which the schedulable program is determined.
  * Returns a ScheduleProgram instance (or null if the user exits).
+ * 
  * @return ScheduleProgram An instance of ScheduleProgram that is the selected program.
  */
 	private ScheduleProgram scheduledProgram() {
@@ -197,11 +223,15 @@ public class RobotController {
 		return selectedProgram;
 	}
 	/**
-	 * Menu where programs can be created for scheduled execution.
+	 * Menu where programs can be created for scheduled execution. Prompts the user
+	 * for amount of actions and which actions should be performed.
+	 * 
 	 * 
 	 * @return ScheduleProgram Returns the user-written program.
 	 */
 	private ScheduleProgram writeProgram() {
+		String programName = "Custom " + (customProgramAmount() + 1);
+		ScheduleProgram sP = new ScheduleProgram(programName);
 		int currentListPosition = 0;
 		int lastItemOnList = actionAmountList.size() - 1;
 		int selectedActionAmount;
@@ -239,15 +269,17 @@ public class RobotController {
 		int loopValue;
 		int currentActionListPosition = 0;
 		int lastItemOnActionList = actionIDList.size() - 1;
-		ArrayList<Integer> programmedActions = new ArrayList<Integer>();
 		LCD.clear();
 		LCD.drawString("PROGRAMMING", 1, 1);
+		
+		boolean escaped = false; // Boolean for breaking for loop in case of escape
 		// Prompts the user to enter the amount of actions previously set
-		for (loopValue = 0; loopValue < selectedActionAmount; loopValue++) {
+		for (loopValue = 0; loopValue < selectedActionAmount && !escaped; loopValue++) {
 			LCD.drawString("Set action " + (loopValue+1) + ":", 1, 2);
 			while (true) {
 				Delay.msDelay(300);
-				LCD.drawString("<- " + getActionName(currentActionListPosition) + " ->", 1, 3);
+				LCD.clear(3);
+				LCD.drawString("<- " + getActionName(actionIDList.get(currentActionListPosition)) + " ->", 1, 3);
 				int buttonPressed = Button.waitForAnyPress();
 				if (buttonPressed == Button.ID_LEFT) {
 					if (currentActionListPosition == 0) {
@@ -264,14 +296,40 @@ public class RobotController {
 				} else if (buttonPressed == Button.ID_ENTER) {
 					break;
 				} else if (buttonPressed == Button.ID_ESCAPE) {
-					// TÄHÄN JOTAIN!
+					escaped = true;
 				}
 			}
-			// TODO: Finish this piece of crap
+			sP.actionList.add(actionIDList.get(currentActionListPosition));
+		} if (escaped) {
+			return null;
+		} else {
+			return sP;
 		}
 		 
 	}
+	/**
+	 * Gets the amount of custom programs to determine how to name the
+	 * next custom program.
+	 * 
+	 * @return The amount of custom programs in memory.
+	 */
+	private int customProgramAmount() {
+		int amount = 0;
+		for (ScheduleProgram prog : progList) {
+			if (prog.programName.contains("Custom")) {
+				amount++;
+			}
+		}
+		return amount;
+	}
 	
+	/**
+	 * A basic switch method for getting a String name for a numeric ID of
+	 * a programmable action.
+	 * 
+	 * @param actionID int The numeric ID for the action
+	 * @return String Returns the name of the action
+	 */
 	private String getActionName(int actionID) {
 		switch(actionID) {
 		case 1:
@@ -323,7 +381,6 @@ public class RobotController {
 			 * thing that popped to my mind and it seems to work. Probably not the best
 			 * idea for futureproofing.
 			 */
-			// TODO: Fix pressedButton resetting if you have time
 			pressedButton = Button.ID_DOWN;
 			Delay.msDelay(300);
 			selectedWaitTime = waitTimeList.get(currentListPosition);
@@ -501,6 +558,12 @@ public class RobotController {
 			// backward
 			lMotor.rotate(rotAmount, true);
 			rMotor.rotate(rotAmount);
+			break;
+		case 10:
+			fistMotor.rotate(180);
+			break;
+		case 11:
+			fistMotor.rotate(-180);
 			break;
 		default:
 			break;

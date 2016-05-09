@@ -24,6 +24,7 @@ public class IRChecker extends Thread {
 	private EV3TouchSensor tSensor = new EV3TouchSensor(SensorPort.S2);
 	private float[] sample = new float[(tSensor.sampleSize())];
 	private boolean touchState = false;
+	public boolean terminate = false;
 	
 	/**
 	 * Constructor receives the IR sensor and points the infraredSensor instance 
@@ -43,7 +44,7 @@ public class IRChecker extends Thread {
 	 * Added: also monitors the touch sensor.
 	 */	
 	public void run() {
-		while (true) {
+		while (!terminate) {
 			int remoteCommand = infraredSensor.getRemoteCommand(0);
 			this.userInput = remoteCommand;
 			tSensor.fetchSample(sample, 0);

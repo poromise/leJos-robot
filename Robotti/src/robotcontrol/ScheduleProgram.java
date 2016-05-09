@@ -24,7 +24,6 @@ public class ScheduleProgram {
 	// Might make get/set methods or something for these, if enough time.
 	public String programName;
 	public boolean abort = false;
-	// TODO: Make abort bool false again after succesfully aborting from the program
 	public ArrayList<Integer> actionList = new ArrayList<Integer>();
 	
 	public ScheduleProgram(String name) {
