@@ -1,24 +1,5 @@
 package robotcontrol;
 
-/**
- * <h1>RobotController.java class</h1>
- * RobotController is the basic functional class of this program. All the controlling
- * is done from here, threaded tasks are delegated to an instance of IRChecker.
- * 
- * <p>
- * 
- * Some of these methods could have been implemented elsewhere (in other classes),
- * but this program is basically the Frankenstein's monster of EV3 programs.
- * Not pleasant to look at. 
- * 
- * <p>
- * 
- * At least it's fairly well commented.
- * 
- * @author Simo Hyttinen
- * @version 0.2
- */
-
 import robotcontrol.IRChecker;
 
 import java.util.ArrayList;
@@ -34,6 +15,24 @@ import lejos.hardware.sensor.EV3IRSensor;
 import lejos.robotics.RegulatedMotor;
 import lejos.utility.Delay;
 
+/**
+ * <h1>Controller class with main functionality</h1>
+ * RobotController is the basic functional class of this program. All the controlling
+ * is done from here, threaded tasks are delegated to an instance of IRChecker.
+ * 
+ * <p>
+ * 
+ * Some of these methods could have been implemented elsewhere (in other classes),
+ * but this program is basically the Frankenstein's monster of EV3 programs.
+ * Not pleasant to look at. 
+ * 
+ * <p>
+ * 
+ * At least it's fairly well commented.
+ * 
+ * @author Simo Hyttinen
+ * @version 0.3.1
+ */
 public class RobotController {
 	
 	private EV3IRSensor irSensor = new EV3IRSensor(SensorPort.S1);

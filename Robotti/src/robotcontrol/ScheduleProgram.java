@@ -1,6 +1,12 @@
 package robotcontrol;
+
+import java.util.ArrayList;
+import lejos.hardware.Button;
+import lejos.hardware.lcd.LCD;
+import lejos.utility.Delay;
+
 /**
- * <h1>ScheduleProgram.java class</h1>
+ * <h1>Program class for schedulable robot movement</h1>
  * A program with a name and a list of commands to be executed.
  * <p>
  * List of numerical commands: <p>
@@ -11,12 +17,13 @@ package robotcontrol;
  * 5: forward <p>
  * 6: turn right <p>
  * 7: turn left <p>
- * 8: backward
+ * 8: backward <p>
+ * 10: turn fist left <p>
+ * 11: turn fist right
+ * 
+ * @author Simo Hyttinen
+ * @version 0.3.1
  */
-import java.util.ArrayList;
-import lejos.hardware.Button;
-import lejos.hardware.lcd.LCD;
-import lejos.utility.Delay;
 
 public class ScheduleProgram {
 	

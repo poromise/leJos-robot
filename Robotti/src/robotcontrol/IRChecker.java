@@ -1,7 +1,12 @@
 package robotcontrol;
 
+import lejos.hardware.port.SensorPort;
+import lejos.hardware.sensor.EV3IRSensor;
+import lejos.hardware.sensor.EV3TouchSensor;
+import lejos.utility.Delay;
+
 /**
- * <h1>IRChecker.java class</h1>
+ * <h1>IR sensor and touch sensor checker</h1>
  * The IRChecker is a thread subclass that is started by the RobotController. It runs
  * on it's own separate thread alongside the RobotController.
  * <p>
@@ -10,13 +15,8 @@ package robotcontrol;
  * the class differently. Live and learn.
  * 
  * @author Simo Hyttinen
- * @version 0.1
+ * @version 0.3.1
  */
-
-import lejos.hardware.port.SensorPort;
-import lejos.hardware.sensor.EV3IRSensor;
-import lejos.hardware.sensor.EV3TouchSensor;
-import lejos.utility.Delay;
 
 public class IRChecker extends Thread {
 	private EV3IRSensor infraredSensor;
