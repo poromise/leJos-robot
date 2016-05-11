@@ -56,7 +56,7 @@ public class RobotController {
 	public RobotController() {
 		// Adds actions to the action lists of the programs
 		program1.actionList.addAll(Arrays.asList(5, 5, 5, 5, 8, 8, 8, 8));
-		program2.actionList.addAll(Arrays.asList(6, 6, 5, 5, 7, 5, 5));
+		program2.actionList.addAll(Arrays.asList(6, 6, 5, 5, 10, 7, 5, 11, 5));
 		program3.actionList.addAll(Arrays.asList(5, 5, 5, 5));
 		program4.actionList.addAll(Arrays.asList(8, 8, 8, 8));
 		waitTimeList.addAll(Arrays.asList(5, 10, 30, 45, 60, 120, 180, 300, 600, 1800, 3600));
@@ -69,6 +69,7 @@ public class RobotController {
 		fistMotor.setSpeed(700); // Sets fist motor speed at just about maximum
 		irc.start(); // Starts infra red sensor checker thread
 	}
+	
 	/**
 	 * The basic functionality of the program: Asks if the user wants to drive
 	 * or schedule a program. Those functions are performed in separate functions.
@@ -167,12 +168,13 @@ public class RobotController {
 			}
 		}
 	}
-/**
- * Contains the menu in which the schedulable program is determined.
- * Returns a ScheduleProgram instance (or null if the user exits).
- * 
- * @return ScheduleProgram An instance of ScheduleProgram that is the selected program.
- */
+	/**
+	 * Contains the menu in which the schedulable program is determined.
+	 * Returns a ScheduleProgram instance (or null if the user exits).
+	 * 
+	 * @return ScheduleProgram An instance of ScheduleProgram that is the selected program.
+	 */
+	
 	private ScheduleProgram scheduledProgram() {
 		int pressedButton; // Numeric ID of the button last pressed
 		int currentListPosition = 0; // Integer to act as index of currently selected program
@@ -296,6 +298,7 @@ public class RobotController {
 					break;
 				} else if (buttonPressed == Button.ID_ESCAPE) {
 					escaped = true;
+					break;
 				}
 			}
 			sP.actionList.add(actionIDList.get(currentActionListPosition));
@@ -559,10 +562,10 @@ public class RobotController {
 			rMotor.rotate(rotAmount);
 			break;
 		case 10:
-			fistMotor.rotate(180);
+			fistMotor.rotate(360);
 			break;
 		case 11:
-			fistMotor.rotate(-180);
+			fistMotor.rotate(-360);
 			break;
 		default:
 			break;

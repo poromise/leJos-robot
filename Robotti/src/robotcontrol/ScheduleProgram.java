@@ -32,7 +32,11 @@ public class ScheduleProgram {
 	public String programName;
 	public boolean abort = false;
 	public ArrayList<Integer> actionList = new ArrayList<Integer>();
-	
+	/**
+	 * The constructor gets the name of the program as a parameter and stores it
+	 * in String programName.
+	 * @param name String The name of the program
+	 */
 	public ScheduleProgram(String name) {
 		this.programName = name;
 	}
@@ -42,8 +46,8 @@ public class ScheduleProgram {
 	 */
 	public void waitForExecute(int waitS) {
 		LCD.clear();
-		LCD.drawString("Waiting for program to start.", 1, 1);
-		LCD.drawString("Press DOWN to abort.", 1, 2);
+		LCD.drawString("DOWN to abort", 1, 1);
+		LCD.drawString("Wait for start", 1, 2);
 		LCD.drawString("Time left: ", 1, 3);
 		while (waitS >= 0) {
 			if (Button.DOWN.isDown()) {
