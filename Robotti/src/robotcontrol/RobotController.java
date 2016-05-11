@@ -31,7 +31,7 @@ import lejos.utility.Delay;
  * At least it's fairly well commented.
  * 
  * @author Simo Hyttinen
- * @version 0.3.1
+ * @version 1.0
  */
 public class RobotController {
 	
@@ -172,7 +172,7 @@ public class RobotController {
 	 * Contains the menu in which the schedulable program is determined.
 	 * Returns a ScheduleProgram instance (or null if the user exits).
 	 * 
-	 * @return ScheduleProgram An instance of ScheduleProgram that is the selected program.
+	 * @return An instance of ScheduleProgram that is the selected program.
 	 */
 	
 	private ScheduleProgram scheduledProgram() {
@@ -228,7 +228,7 @@ public class RobotController {
 	 * for amount of actions and which actions should be performed.
 	 * 
 	 * 
-	 * @return ScheduleProgram Returns the user-written program.
+	 * @return Returns the user-written program.
 	 */
 	private ScheduleProgram writeProgram() {
 		String programName = "Custom " + (customProgramAmount() + 1);
@@ -329,8 +329,8 @@ public class RobotController {
 	 * A basic switch method for getting a String name for a numeric ID of
 	 * a programmable action.
 	 * 
-	 * @param actionID int The numeric ID for the action
-	 * @return String Returns the name of the action
+	 * @param actionID The numeric ID for the action
+	 * @return Returns the name of the action as a string
 	 */
 	private String getActionName(int actionID) {
 		switch(actionID) {
@@ -363,7 +363,7 @@ public class RobotController {
 	 * Menu for determining the length of the waiting period before executing
 	 * selected program.
 	 * 
-	 * @return int The selected waiting time as an integer
+	 * @return The selected waiting time as an integer
 	 */
 	private int scheduledProgramWaitTime() {
 		int pressedButton; // Holds the ID of the last button pressed
@@ -421,7 +421,7 @@ public class RobotController {
 	/**
 	 * Moves the tracks according to given parameters.
 	 * 
-	 * @param direction int Integer that determines the direction of movement.
+	 * @param direction Integer that determines the direction of movement.
 	 */
 	private void moveTracks(int direction) {
 		switch (direction) {
@@ -470,7 +470,7 @@ public class RobotController {
 	/**
 	 * Swings the fist around according to given parameters.
 	 * 
-	 * @param direction int Integer that defines the direction in which to move the fist.
+	 * @param direction Integer that defines the direction in which to move the fist.
 	 */
 	private void moveFist(int direction) {
 		switch(direction) {
@@ -501,7 +501,7 @@ public class RobotController {
 	 * Reads the list of maneuvers in given program and iterates through
 	 * them sending then to programedManeuver() to be executed while doing so.
 	 * 
-	 * @param program ScheduleProgram The program which is to be executed.
+	 * @param program The program which is to be executed.
 	 */
 	private void executeProgram(ScheduleProgram program) {
 		LCD.drawString("Executing:", 1, 1);
@@ -520,7 +520,7 @@ public class RobotController {
 	/**
 	 * Executes maneuvers requested by executeProgram().
 	 * 
-	 * @param maneuver int The numeric case number for the next executable maneuver.
+	 * @param maneuver The numeric case number for the next executable maneuver.
 	 */
 	private void programmedManeuver(int maneuver) {
 		int rotAmount = 720;

@@ -15,7 +15,7 @@ import lejos.utility.Delay;
  * the class differently. Live and learn.
  * 
  * @author Simo Hyttinen
- * @version 0.3.1
+ * @version 1.0
  */
 
 public class IRChecker extends Thread {
@@ -30,7 +30,7 @@ public class IRChecker extends Thread {
 	 * Constructor receives the IR sensor and points the infraredSensor instance 
 	 * variable to it.
 	 * 
-	 * @param sensor EV3IRSensor Places the received IR sensor in the infraredSensor instance variable.
+	 * @param sensor Takes an IR sensor as a parameter.
 	 */
 	public IRChecker(EV3IRSensor sensor) {
 		this.infraredSensor = sensor;
@@ -66,7 +66,7 @@ public class IRChecker extends Thread {
 	/**
 	 * Getter method for the user input.
 	 * 
-	 * @return int Numeric code for the user input received from the IR sensor.
+	 * @return Numeric code for the user input received from the IR sensor.
 	 */
 	public int getUserInput() {
 		return userInput;
@@ -74,7 +74,7 @@ public class IRChecker extends Thread {
 	/**
 	 * Getter method for touch sensor state.
 	 * 
-	 * @return boolean State of the touch sensor. True means it is pressed.
+	 * @return State of the touch sensor. True means it is pressed.
 	 */
 	public boolean getTouchState() {
 		return touchState;

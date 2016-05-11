@@ -22,7 +22,7 @@ import lejos.utility.Delay;
  * 11: turn fist right
  * 
  * @author Simo Hyttinen
- * @version 0.3.1
+ * @version 1.0
  */
 
 public class ScheduleProgram {
@@ -35,7 +35,7 @@ public class ScheduleProgram {
 	/**
 	 * The constructor gets the name of the program as a parameter and stores it
 	 * in String programName.
-	 * @param name String The name of the program
+	 * @param name The name of the program
 	 */
 	public ScheduleProgram(String name) {
 		this.programName = name;

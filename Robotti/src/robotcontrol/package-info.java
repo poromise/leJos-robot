@@ -16,7 +16,7 @@
  * 
  * @author Merimakkara
  * @since 0.3.1
- * @version 0.3.1
+ * @version 1.0
  */
 
 package robotcontrol;
