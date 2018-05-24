@@ -1,0 +1,2 @@
+$ cat .gitattributes
+Robotti/doc/* linguist-documentation
